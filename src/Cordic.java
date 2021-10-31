@@ -1,26 +1,21 @@
-import java.util.Arrays;
 
 public class Cordic {
-    private final static int iterations = 100;
+    private final static boolean DEBUG = true;
+    private final static int MAX_ITERATIONS = 79; //max precision reached after 79 iteration regardless of input
 
     private static double x;
     private static double y;
     private static double z;
     private static double a;
-    private static boolean debug = false;
 
 
     private static void iterate(int i, int d) {
         double tempX = x;
         double pow = Math.pow(2, -i);
-        x = x - d * pow * y;
-        y = y + pow * d * tempX;
-        z = z - d * Math.atan(pow);
-        a = a * Math.sqrt(1 + Math.pow(2, -2 * (i + 1)));
-        //a = a * Math.sqrt(1 + Math.pow(2, -2 * (i + 1)));
-        /*x = x - d * Math.pow(2, -i) * y;
-        y = y + Math.pow(2, -i) * d * tempX;
-        z = z - d * Math.atan(Math.pow(2, -i));*/
+        x -= d * pow * y;
+        y += pow * d * tempX;
+        z -= d * Math.atan(pow);
+        a *= Math.sqrt(1 + Math.pow(2.0, -2 * (double)(i + 1)));
     }
 
     private static double[] startIteration(double alpha) {
@@ -28,12 +23,12 @@ public class Cordic {
         y = 0;
         z = alpha;
         int d;
-        if (debug) System.out.println("  I ||  X                  ||  Y                  ||  Z                  ||" +
+        if (DEBUG) System.out.println("  I ||  X                  ||  Y                  ||  Z                  ||" +
                 "  A                  ||  D");
-        for (int i = 0; i < iterations; i++) {
+        for (int i = 0; i <= MAX_ITERATIONS; i++) {
             d = (z < 0) ? -1 : 1;
             if (z == 0) d = 0;
-            if (debug) System.out.println(String.format("%3d || % .16f || % .16f || % .16f || % .16f || % 2d", i, x, y, z, a, d));
+            if (DEBUG) System.out.printf("%3d || % .16f || % .16f || % .16f || % .16f || % 2d%n", i, x, y, z, a, d);
             iterate(i, d);
             if (z == 0) break;
         }
@@ -41,8 +36,7 @@ public class Cordic {
     }
 
     public static void main(String[] args) {
-        debug = false;
-        double alpha = 3.14;
+        double alpha = 0.4;
         a = Math.sqrt(2);
         double[] result  = startIteration(alpha);
         System.out.println("cos(" + alpha + ") = " + (result[0] * (1 / result[2])));
